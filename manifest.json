@@ -1,0 +1,24 @@
+{
+  "name": "우물천장 직간접 라인조명 산출기",
+  "short_name": "라인조명산출기",
+  "description": "데이터 연결 없이 100% 오프라인 작동하는 우물천장 직간접 라인조명 등기구 및 자재 산출기",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "scope": "./"
+}
