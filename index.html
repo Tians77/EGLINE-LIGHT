@@ -597,7 +597,7 @@ function calculateLighting(input, config, catalog) {
         const directSmpsSpec = getDirectSmpsSpec(directSmpsLen);
         // 간접 SMPS (우물천장길이 - 500mm 기준 제원표 매핑!)
         const indirectSmpsSpec = getIndirectSmpsSpec(ceilingLen);
-        const indirectSmpsCount = 2;
+        const indirectSmpsCount = indirectSmpsSpec.type === '2S' ? 4 : 2;
         const directLedCombo = getBestLedCombination(bodyLen) || {
             caseNo: 1, combination: 'N/A', c500: 0, c450: 0, c400: 0, c300: 0,
             totalPcb: 0, checkSum: 0, hasBoth400And300: false, selectionKey: ''
@@ -756,7 +756,7 @@ function calculateLighting(input, config, catalog) {
         name: '간접 SMPS (가로)', model: getCatDef('간접 SMPS').model,
         length: widthCalc.indirectSmpsSpec.indirectBaseLength,
         spec: `${widthCalc.indirectSmpsSpec.inputPower}W (${widthCalc.indirectSmpsSpec.outputCurrent}A, ${widthCalc.indirectSmpsSpec.type})`,
-        unit: 'EA', perHouseholdQty: 2, totalQty: 2 * N,
+        unit: 'EA', perHouseholdQty: widthCalc.indirectSmpsCount, totalQty: widthCalc.indirectSmpsCount * N,
         notes: `${widthCalc.indirectSmpsSpec.type === '2S' ? '(우물천장/2)-500mm' : '우물천장-500mm'} (${widthCalc.indirectSmpsSpec.indirectBaseLength}mm) 기준 매핑 [${widthCalc.indirectSmpsSpec.inputPower}W]`
     });
     bomList.push({
@@ -764,7 +764,7 @@ function calculateLighting(input, config, catalog) {
         name: '간접 SMPS (세로)', model: getCatDef('간접 SMPS').model,
         length: heightCalc.indirectSmpsSpec.indirectBaseLength,
         spec: `${heightCalc.indirectSmpsSpec.inputPower}W (${heightCalc.indirectSmpsSpec.outputCurrent}A, ${heightCalc.indirectSmpsSpec.type})`,
-        unit: 'EA', perHouseholdQty: 2, totalQty: 2 * N,
+        unit: 'EA', perHouseholdQty: heightCalc.indirectSmpsCount, totalQty: heightCalc.indirectSmpsCount * N,
         notes: `${heightCalc.indirectSmpsSpec.type === '2S' ? '(우물천장/2)-500mm' : '우물천장-500mm'} (${heightCalc.indirectSmpsSpec.indirectBaseLength}mm) 기준 매핑 [${heightCalc.indirectSmpsSpec.inputPower}W]`
     });
     // 전원선
@@ -909,7 +909,7 @@ function calculateLighting(input, config, catalog) {
     });
     const totalDirectBodyLength = (widthCalc.bodyLength * 2 + heightCalc.bodyLength * 2) * N;
     const totalIndirectLength = (widthCalc.indirectLength * 4 + heightCalc.indirectLength * 4) * N;
-    const totalSmpsCount = (widthCalc.directSmpsCount + heightCalc.directSmpsCount + 4) * N;
+    const totalSmpsCount = (widthCalc.directSmpsCount + heightCalc.directSmpsCount + widthCalc.indirectSmpsCount + heightCalc.indirectSmpsCount) * N;
     const totalLedPcbCount = ((direct300 + direct400 + direct450 + direct500) +
         16 +
         (ind300 + ind400 + ind450 + ind500)) * N;
