@@ -423,8 +423,10 @@ function getDirectSmpsSpec(targetLength) {
 // ==========================================
 // 2. DATA: 간접등 SMPS 규격제원표 (우물천장 길이 - 500mm 기준)
 // ==========================================
+// 간접등은 우물천장 3550mm부터 2S (1S 기준길이 천장-500이 직하 제원표 최대 3000mm를 넘기 때문)
+const INDIRECT_2S_FROM = 3550;
 function getIndirectSmpsSpec(ceilingLength) {
-    const type = ceilingLength > 3000 ? '2S' : '1S';
+    const type = ceilingLength >= INDIRECT_2S_FROM ? '2S' : '1S';
     let baseLength = 0;
     if (type === '1S') {
         baseLength = Math.max(50, ceilingLength - 500);
@@ -753,17 +755,17 @@ function calculateLighting(input, config, catalog) {
         id: 'smps-indirect-w', category: '전원 파트', vendor: getCatDef('간접 SMPS').vendor,
         name: '간접 SMPS (가로)', model: getCatDef('간접 SMPS').model,
         length: widthCalc.indirectSmpsSpec.indirectBaseLength,
-        spec: `${widthCalc.indirectSmpsSpec.inputPower}W (${widthCalc.indirectSmpsSpec.outputCurrent}A)`,
+        spec: `${widthCalc.indirectSmpsSpec.inputPower}W (${widthCalc.indirectSmpsSpec.outputCurrent}A, ${widthCalc.indirectSmpsSpec.type})`,
         unit: 'EA', perHouseholdQty: 2, totalQty: 2 * N,
-        notes: `우물천장-500mm (${widthCalc.indirectSmpsSpec.indirectBaseLength}mm) 기준 매핑 [${widthCalc.indirectSmpsSpec.inputPower}W]`
+        notes: `${widthCalc.indirectSmpsSpec.type === '2S' ? '(우물천장/2)-500mm' : '우물천장-500mm'} (${widthCalc.indirectSmpsSpec.indirectBaseLength}mm) 기준 매핑 [${widthCalc.indirectSmpsSpec.inputPower}W]`
     });
     bomList.push({
         id: 'smps-indirect-h', category: '전원 파트', vendor: getCatDef('간접 SMPS').vendor,
         name: '간접 SMPS (세로)', model: getCatDef('간접 SMPS').model,
         length: heightCalc.indirectSmpsSpec.indirectBaseLength,
-        spec: `${heightCalc.indirectSmpsSpec.inputPower}W (${heightCalc.indirectSmpsSpec.outputCurrent}A)`,
+        spec: `${heightCalc.indirectSmpsSpec.inputPower}W (${heightCalc.indirectSmpsSpec.outputCurrent}A, ${heightCalc.indirectSmpsSpec.type})`,
         unit: 'EA', perHouseholdQty: 2, totalQty: 2 * N,
-        notes: `우물천장-500mm (${heightCalc.indirectSmpsSpec.indirectBaseLength}mm) 기준 매핑 [${heightCalc.indirectSmpsSpec.inputPower}W]`
+        notes: `${heightCalc.indirectSmpsSpec.type === '2S' ? '(우물천장/2)-500mm' : '우물천장-500mm'} (${heightCalc.indirectSmpsSpec.indirectBaseLength}mm) 기준 매핑 [${heightCalc.indirectSmpsSpec.inputPower}W]`
     });
     // 전원선
     bomList.push({
@@ -1062,7 +1064,7 @@ function exportCalculationToExcel(result) {
     function smpsBaseLenStr(calc, type) {
         if (type === 'direct')
             return (calc.type === '1S' ? calc.ceilingLength : calc.ceilingLength / 2) + 'mm (' + calc.type + ')';
-        return (calc.type === '1S' ? calc.ceilingLength - 500 : (calc.ceilingLength / 2) - 500) + 'mm (천장-500)';
+        return calc.indirectSmpsSpec.indirectBaseLength + 'mm (' + calc.indirectSmpsSpec.type + (calc.indirectSmpsSpec.type === '1S' ? ', 천장-500)' : ', 천장/2-500)');
     }
     s1.push(['직하 SMPS (가로)', smpsBaseLenStr(widthCalc, 'direct'), widthCalc.directSmpsSpec.inputPower + 'W', widthCalc.directSmpsSpec.outputCurrent + 'A', widthCalc.directSmpsCount, widthCalc.directSmpsCount * input.households]);
     s1.push(['직하 SMPS (세로)', smpsBaseLenStr(heightCalc, 'direct'), heightCalc.directSmpsSpec.inputPower + 'W', heightCalc.directSmpsSpec.outputCurrent + 'A', heightCalc.directSmpsCount, heightCalc.directSmpsCount * input.households]);
@@ -1493,7 +1495,9 @@ function App() {
                                         React.createElement("span", { className: "text-[10px] text-slate-400 block font-sans" },
                                             "(\uAE30\uC900: ",
                                             result.widthCalc.indirectSmpsSpec.indirectBaseLength,
-                                            "mm)"))))),
+                                            "mm · ",
+                                            result.widthCalc.indirectSmpsSpec.type,
+                                            ")"))))),
                         React.createElement("div", { className: "bg-orange-50/50 p-4 rounded-xl border border-orange-200 shadow-sm space-y-3" },
                             React.createElement("div", { className: "flex justify-between items-center" },
                                 React.createElement("span", { className: "text-xs font-bold text-orange-950 flex items-center space-x-1" },
@@ -1531,7 +1535,9 @@ function App() {
                                         React.createElement("span", { className: "text-[10px] text-slate-400 block font-sans" },
                                             "(\uAE30\uC900: ",
                                             result.heightCalc.indirectSmpsSpec.indirectBaseLength,
-                                            "mm)"))))))),
+                                            "mm · ",
+                                            result.heightCalc.indirectSmpsSpec.type,
+                                            ")"))))))),
                 React.createElement("div", { className: "bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200" },
                     React.createElement("div", { className: "flex items-center justify-between pb-3 border-b border-slate-100" },
                         React.createElement("h3", { className: "text-sm sm:text-base font-bold text-slate-900" }, "\uC6B0\uBB3C\uCC9C\uC7A5 \uB4F1\uAE30\uAD6C \uC2E4\uC2DC\uAC04 \uBC30\uCE58 \uAD6C\uC870\uB3C4 (\uB77C\uC778 \uC870\uBA85 \uC0C1\uC138)"),

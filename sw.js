@@ -1,6 +1,6 @@
 // Service Worker: 앱 파일을 기기에 저장해 데이터 연결 없이 실행되게 한다.
 // index.html 등을 수정해 배포할 때마다 CACHE_NAME 버전을 올린다.
-const CACHE_NAME = 'ceiling-lighting-calc-v2';
+const CACHE_NAME = 'ceiling-lighting-calc-v3';
 const APP_FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
